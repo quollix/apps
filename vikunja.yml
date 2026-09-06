@@ -1,0 +1,46 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  postgres:
+    container_name: quollix_vikunja_postgres
+    image: postgres:17.5-alpine3.22@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa
+    environment:
+      POSTGRES_DB: vikunja
+      POSTGRES_USER: vikunja
+      POSTGRES_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+    volumes:
+      - quollix_vikunja_postgres:/var/lib/postgresql/data
+
+  vikunja:
+    container_name: quollix_vikunja_vikunja
+    image: vikunja/vikunja:2.6.0@sha256:417ada6f94e81f0267aa2f007d0a811fc82d38dd2aa58351e3ea520ca01c2ea5
+    user: "0:0"
+    depends_on:
+      - postgres
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: "https://vikunja.${BASE_DOMAIN}/"
+      VIKUNJA_SERVICE_SECRET: "${SECRET_SERVICE_SECRET}"
+      VIKUNJA_SERVICE_ENABLEREGISTRATION: false
+
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: quollix_vikunja_postgres
+      VIKUNJA_DATABASE_DATABASE: vikunja
+      VIKUNJA_DATABASE_USER: vikunja
+      VIKUNJA_DATABASE_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+
+      VIKUNJA_AUTH_LOCAL_ENABLED: false
+      VIKUNJA_AUTH_OPENID_ENABLED: true
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_NAME: Quollix
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_AUTHURL: "https://quollix.${BASE_DOMAIN}"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_CLIENTID: "${CLIENT_ID}"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_CLIENTSECRET: "${CLIENT_SECRET}"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_SCOPE: "openid profile email"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_QUOLLIX_FORCEUSERINFO: true
+    volumes:
+      - quollix_vikunja_files:/app/vikunja/files
+    labels:
+      quollix.port: 3456
+
+volumes:
+  quollix_vikunja_files: null
+  quollix_vikunja_postgres: null

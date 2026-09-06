@@ -1,0 +1,112 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  postgres:
+    container_name: quollix_zulip_postgres
+    image: zulip/zulip-postgresql:14@sha256:e71ba8616fa42cdc1b248f51263d9290c29681cb8c1992eb9b498af0bb656b29
+    environment:
+      POSTGRES_DB: zulip
+      POSTGRES_USER: zulip
+      POSTGRES_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+    volumes:
+      - quollix_zulip_postgresql:/var/lib/postgresql/data:rw
+
+  memcached:
+    container_name: quollix_zulip_memcached
+    image: memcached:1.6.45-alpine3.24@sha256:c29847751abb41f4c268c84fb3087fee05d4edcbda44409ccb5086e26148e8a7
+    command:
+      - sh
+      - -euc
+      - |
+        echo 'mech_list: plain' > "$$SASL_CONF_PATH"
+        echo "zulip@$$HOSTNAME:$$MEMCACHED_PASSWORD" > "$$MEMCACHED_SASL_PWDB"
+        echo "zulip@localhost:$$MEMCACHED_PASSWORD" >> "$$MEMCACHED_SASL_PWDB"
+        exec memcached -S
+    environment:
+      SASL_CONF_PATH: /home/memcache/memcached.conf
+      MEMCACHED_SASL_PWDB: /home/memcache/memcached-sasl-db
+      MEMCACHED_PASSWORD: "${SECRET_MEMCACHED_PASSWORD}"
+
+  rabbitmq:
+    container_name: quollix_zulip_rabbitmq
+    image: rabbitmq:4.3.2-alpine@sha256:835cbc6fabceedef7a3b0ce3195a17adccb753a3ba645bdd61c5557b6e4bf580
+    environment:
+      RABBITMQ_DEFAULT_USER: zulip
+      RABBITMQ_DEFAULT_PASS: "${SECRET_RABBITMQ_PASSWORD}"
+      # The following node name keeps the RabbitMQ data directory stable across container recreations and upgrades.
+      RABBITMQ_NODENAME: rabbit@rabbitmq
+    volumes:
+      - quollix_zulip_rabbitmq:/var/lib/rabbitmq:rw
+
+  redis:
+    container_name: quollix_zulip_redis
+    image: redis:8.6-alpine3.23@sha256:75934ddb37bfaebe3b4082ba673cac39f66495244134f33dd0a502ce03cdcd36
+    command:
+      - sh
+      - -euc
+      - |
+        echo "requirepass '$$REDIS_PASSWORD'" > /etc/redis.conf
+        exec redis-server /etc/redis.conf
+    environment:
+      REDIS_PASSWORD: "${SECRET_REDIS_PASSWORD}"
+    volumes:
+      - quollix_zulip_redis:/data:rw
+
+  zulip:
+    container_name: quollix_zulip_zulip
+    image: ghcr.io/zulip/zulip-server:12.2-0@sha256:765f0ab3caa49041989132ee1879d98dbab1df7695c27e713eac1f114d167755
+    environment:
+      SETTING_REMOTE_POSTGRES_HOST: postgres
+      SETTING_REMOTE_POSTGRES_PORT: "5432"
+      CONFIG_postgresql__database_user: zulip
+      CONFIG_postgresql__database_name: zulip
+
+      SETTING_MEMCACHED_LOCATION: memcached:11211
+      SETTING_RABBITMQ_HOST: rabbitmq
+      SETTING_REDIS_HOST: redis
+
+      SECRETS_rabbitmq_password: "${SECRET_RABBITMQ_PASSWORD}"
+      SECRETS_postgres_password: "${SECRET_POSTGRES_PASSWORD}"
+      SECRETS_memcached_password: "${SECRET_MEMCACHED_PASSWORD}"
+      SECRETS_redis_password: "${SECRET_REDIS_PASSWORD}"
+      SECRETS_secret_key: "${SECRET_DJANGO_SECRET_KEY}"
+
+      # Uses the RFC-reserved .invalid TLD (RFC 2606 / RFC 6761), guaranteed to never resolve or receive mail
+      SETTING_ZULIP_ADMINISTRATOR: admin@example.invalid
+
+      SETTING_EXTERNAL_HOST: "zulip.${BASE_DOMAIN}"
+
+      CERTIFICATES: ""
+      LOADBALANCER_IPS: 0.0.0.0/0
+
+      ZULIP_AUTH_BACKENDS: GenericOpenIdConnectBackend
+      ZULIP_CUSTOM_SETTINGS: |
+        SOCIAL_AUTH_OIDC_ENABLED_IDPS = {
+          "zulip": {
+            "oidc_url": "https://quollix.${BASE_DOMAIN}",
+            "display_name": "Quollix",
+            "client_id": "${CLIENT_ID}",
+            "secret": get_secret("social_auth_oidc_secret"),
+            "auto_signup": True,
+          },
+        }
+      # Store the client secret in zulip-secrets.conf (generated from env)
+      SECRETS_social_auth_oidc_secret: "${CLIENT_SECRET}"
+
+      # Bypass the HTTP proxy for our OIDC identity provider; otherwise Zulip login fails with 407 Proxy Error
+      NO_PROXY: "quollix.${BASE_DOMAIN}"
+    volumes:
+      - quollix_zulip_data:/data:rw
+    depends_on:
+      - postgres
+      - memcached
+      - rabbitmq
+      - redis
+    labels:
+      quollix.port: 80
+
+volumes:
+  quollix_zulip_data: null
+  quollix_zulip_postgresql: null
+  quollix_zulip_rabbitmq: null
+  quollix_zulip_redis: null

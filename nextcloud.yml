@@ -1,0 +1,46 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  mariadb:
+    container_name: quollix_nextcloud_mariadb
+    image: mariadb:11.4.12@sha256:4f1d8d202fcf7bcb3902f63af09f9c1a050c2922a89652f22abaec0d4f015e83
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      MARIADB_DATABASE: nextcloud
+      MARIADB_USER: nextcloud
+      MARIADB_PASSWORD: "${SECRET_MARIADB_PASSWORD}"
+      MARIADB_ROOT_PASSWORD: "${SECRET_MARIADB_ROOT_PASSWORD}"
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - quollix_nextcloud_mariadb:/var/lib/mysql
+
+  redis:
+    container_name: quollix_nextcloud_redis
+    image: redis:8.6-alpine3.23@sha256:75934ddb37bfaebe3b4082ba673cac39f66495244134f33dd0a502ce03cdcd36
+    volumes:
+      - quollix_nextcloud_redis:/data
+
+  nextcloud:
+    container_name: quollix_nextcloud_nextcloud
+    image: nextcloud:34.0.3-apache@sha256:b97df9e0e1ee3c8c6cc009cb3f12ddce915d624d543b3bb93882025fe323a407
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      MYSQL_HOST: quollix_nextcloud_mariadb
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: "${SECRET_MARIADB_PASSWORD}"
+      REDIS_HOST: quollix_nextcloud_redis
+      # Tell Nextcloud that users access it through HTTPS, even though the internal reverse proxy forwards plain HTTP.
+      # Without this, security-sensitive features that require HTTPS, such as OIDC login, do not work.
+      OVERWRITEPROTOCOL: https
+    volumes:
+      - quollix_nextcloud_nextcloud:/var/www/html
+    labels:
+      quollix.port: 80
+
+volumes:
+  quollix_nextcloud_mariadb: null
+  quollix_nextcloud_nextcloud: null
+  quollix_nextcloud_redis: null

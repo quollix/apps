@@ -1,0 +1,37 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  mariadb:
+    container_name: quollix_wordpress_mariadb
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: "${SECRET_MARIADB_PASSWORD}"
+      MARIADB_ROOT_PASSWORD: "${SECRET_MARIADB_ROOT_PASSWORD}"
+      MARIADB_AUTO_UPGRADE: "1"
+    image: mariadb:11.4.12@sha256:4f1d8d202fcf7bcb3902f63af09f9c1a050c2922a89652f22abaec0d4f015e83
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - quollix_wordpress_mariadb:/var/lib/mysql
+
+  wordpress:
+    container_name: quollix_wordpress_wordpress
+    depends_on:
+      - mariadb
+    environment:
+      WORDPRESS_DB_HOST: quollix_wordpress_mariadb:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: "${SECRET_MARIADB_PASSWORD}"
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'AUTOMATIC_UPDATER_DISABLED', true );
+        define( 'WP_AUTO_UPDATE_CORE', false );
+    image: wordpress:7.1.0-apache@sha256:5a93c470ae8220fddf71f6ebe3bc94e615ddc2ae4d9810f795b830fb11c41a17
+    volumes:
+      - quollix_wordpress_wordpress:/var/www/html
+    labels:
+      quollix.port: 80
+
+volumes:
+  quollix_wordpress_wordpress: null
+  quollix_wordpress_mariadb: null

@@ -1,0 +1,47 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  postgres:
+    container_name: quollix_forgejo_postgres
+    environment:
+      POSTGRES_USER: forgejo
+      POSTGRES_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+      POSTGRES_DB: forgejo
+    image: postgres:17.5-alpine3.22@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa
+    volumes:
+      - quollix_forgejo_postgres:/var/lib/postgresql/data
+
+  forgejo:
+    container_name: quollix_forgejo_forgejo
+    depends_on:
+      - postgres
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      FORGEJO__server__DOMAIN: forgejo.${BASE_DOMAIN}
+      FORGEJO__server__ROOT_URL: https://forgejo.${BASE_DOMAIN}/
+      FORGEJO__server__SSH_DOMAIN: forgejo.${BASE_DOMAIN}
+      FORGEJO__server__SSH_PORT: 2223
+
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: quollix_forgejo_postgres:5432
+      FORGEJO__database__NAME: forgejo
+      FORGEJO__database__USER: forgejo
+      FORGEJO__database__PASSWD: "${SECRET_POSTGRES_PASSWORD}"
+
+      FORGEJO__service__DISABLE_REGISTRATION: false
+      FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+      FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: true
+      FORGEJO__service__SHOW_REGISTRATION_BUTTON: false
+
+    image: codeberg.org/forgejo/forgejo:16.0.3@sha256:7c4e1db440be7b2ca685b49d0d7864cdd78e92431f531bf7893659def8200fc5
+    ports:
+      - "2223:22/tcp"
+    volumes:
+      - quollix_forgejo_forgejo:/data
+    labels:
+      quollix.port: 3000
+
+volumes:
+  quollix_forgejo_forgejo: null
+  quollix_forgejo_postgres: null

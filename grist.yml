@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: quollix_grist_postgres
+    image: postgres:17.5-alpine3.22@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa
+    environment:
+      POSTGRES_DB: grist
+      POSTGRES_USER: grist
+      POSTGRES_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+    volumes:
+      - quollix_grist_postgres:/var/lib/postgresql/data
+
+  grist:
+    container_name: quollix_grist_grist
+    image: gristlabs/grist-oss:1.7.17@sha256:b87ec1c3b62ca99f872611a9aa71ca33ee5fef9f40e0921e0beed878e5083473
+    depends_on:
+      - postgres
+    environment:
+      APP_HOME_URL: "https://grist.${BASE_DOMAIN}"
+      GRIST_SESSION_SECRET: "${SECRET_SESSION_SECRET}"
+      GRIST_BOOT_KEY: "${SECRET_BOOT_KEY}"
+      GRIST_ORG_IN_PATH: "true"
+
+      GRIST_OIDC_IDP_ISSUER: "https://quollix.${BASE_DOMAIN}"
+      GRIST_OIDC_IDP_CLIENT_ID: "${CLIENT_ID}"
+      GRIST_OIDC_IDP_CLIENT_SECRET: "${CLIENT_SECRET}"
+      GRIST_OIDC_IDP_SCOPES: "openid email profile"
+      GRIST_OIDC_SP_HOST: "https://grist.${BASE_DOMAIN}"
+      GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
+      GRIST_OIDC_SP_IGNORE_EMAIL_VERIFIED: "true"
+
+      TYPEORM_TYPE: postgres
+      TYPEORM_HOST: quollix_grist_postgres
+      TYPEORM_PORT: 5432
+      TYPEORM_DATABASE: grist
+      TYPEORM_USERNAME: grist
+      TYPEORM_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+    volumes:
+      - quollix_grist_data:/persist
+    labels:
+      quollix.port: 8484
+
+volumes:
+  quollix_grist_data: null
+  quollix_grist_postgres: null

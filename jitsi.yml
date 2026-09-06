@@ -1,0 +1,106 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+# Security model:
+# - Quollix exposes only the Jitsi web container's port 8080 through its protected reverse proxy.
+# - Jitsi Videobridge still needs a public UDP media port. The official Docker deployment docs list 10000/udp as an external port for RTP media, while Prosody/XMPP traffic is expected to stay sealed inside the Docker network: https://jitsi.github.io/handbook/docs/devops-guide/devops-guide-docker/
+# - JVB may also make outbound STUN requests to discover its public address; the Docker docs list public STUN servers as the default. This is not an access control bypass and does not expose the web UI or XMPP services, but it can reveal server metadata to the configured STUN providers.
+
+services:
+  jitsi:
+    container_name: quollix_jitsi_jitsi
+    image: ghcr.io/jitsi/web:stable-11146-2@sha256:4231d5ff7318ff71d12ffd41afc36adae3c319b40cf79cde39b009b0c68295dc
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    depends_on:
+      - prosody
+      - jicofo
+      - jvb
+    environment:
+      PUBLIC_URL: https://jitsi.${BASE_DOMAIN}
+      DISABLE_HTTPS: 1
+      ENABLE_HTTP_REDIRECT: 0
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_GUEST_DOMAIN: guest.meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      XMPP_RECORDER_DOMAIN: recorder.meet.jitsi
+      XMPP_SERVER: quollix_jitsi_prosody
+      XMPP_BOSH_URL_BASE: http://quollix_jitsi_prosody:5280
+    volumes:
+      - quollix_jitsi_web:/config
+      - quollix_jitsi_webstorage:/storage
+      - quollix_jitsi_transcripts:/usr/share/jitsi-meet/transcripts:ro
+      - quollix_jitsi_loadtest:/usr/share/jitsi-meet/load-test
+    labels:
+      quollix.port: 8000
+
+  prosody:
+    container_name: quollix_jitsi_prosody
+    image: ghcr.io/jitsi/prosody:stable-11146-2@sha256:9e341b10134d947e49ca338b9efe8d70ac9d6e8d89d621da2246dfa79fe50363
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    environment:
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_GUEST_DOMAIN: guest.meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      XMPP_RECORDER_DOMAIN: recorder.meet.jitsi
+      JICOFO_AUTH_PASSWORD: "${SECRET_JICOFO_AUTH_PASSWORD}"
+      JVB_AUTH_PASSWORD: "${SECRET_JVB_AUTH_PASSWORD}"
+      JICOFO_COMPONENT_SECRET: "${SECRET_JICOFO_COMPONENT_SECRET}"
+      JVB_AUTH_USER: jvb
+    volumes:
+      - quollix_jitsi_prosody:/config
+      - quollix_jitsi_prosodystorage:/var/lib/prosody
+
+  jicofo:
+    container_name: quollix_jitsi_jicofo
+    image: ghcr.io/jitsi/jicofo:stable-11146-2@sha256:a8d64e46eaa340751a2b5530a4abd4175adf05bff07e9775fc48daae6364cfe9
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    depends_on:
+      - prosody
+    environment:
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      XMPP_SERVER: quollix_jitsi_prosody
+      JICOFO_AUTH_PASSWORD: "${SECRET_JICOFO_AUTH_PASSWORD}"
+      JICOFO_COMPONENT_SECRET: "${SECRET_JICOFO_COMPONENT_SECRET}"
+    volumes:
+      - quollix_jitsi_jicofo:/config
+
+  jvb:
+    container_name: quollix_jitsi_jvb
+    image: ghcr.io/jitsi/jvb:stable-11146-2@sha256:d7dc646d21af07530ae6acf1ace23ea4782445d0362004621a32a5a632a964e9
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    depends_on:
+      - prosody
+    environment:
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      XMPP_SERVER: quollix_jitsi_prosody
+      JVB_AUTH_USER: jvb
+      JVB_AUTH_PASSWORD: "${SECRET_JVB_AUTH_PASSWORD}"
+      JVB_PORT: 10000
+    ports:
+      - "10000:10000/udp"
+    volumes:
+      - quollix_jitsi_jvb:/config
+
+volumes:
+  quollix_jitsi_web: null
+  quollix_jitsi_webstorage: null
+  quollix_jitsi_loadtest: null
+  quollix_jitsi_prosody: null
+  quollix_jitsi_prosodystorage: null
+  quollix_jitsi_jicofo: null
+  quollix_jitsi_jvb: null
+  quollix_jitsi_transcripts: null

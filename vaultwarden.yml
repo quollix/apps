@@ -1,0 +1,24 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  vaultwarden:
+    container_name: quollix_vaultwarden_vaultwarden
+    image: vaultwarden/server:1.37.2-alpine@sha256:d16a304c2476fd787634ddde2c00be8fdfa1a72539438c626ece3686b5b88ab4
+    environment:
+      ADMIN_TOKEN: "${SECRET_ADMIN_TOKEN}"
+      SIGNUPS_ALLOWED: false
+      DOMAIN: https://vaultwarden.${BASE_DOMAIN}
+
+      SSO_ENABLED: true
+      SSO_AUTHORITY: https://quollix.${BASE_DOMAIN}
+      SSO_CLIENT_ID: ${CLIENT_ID}
+      SSO_CLIENT_SECRET: ${CLIENT_SECRET}
+      SSO_ONLY: true
+      SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION: true
+    volumes:
+      - quollix_vaultwarden_data:/data
+    labels:
+      quollix.port: 80
+
+volumes:
+  quollix_vaultwarden_data: null
