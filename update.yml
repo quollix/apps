@@ -1,0 +1,8 @@
+force_image:
+  postgres: 17.5-alpine3.22
+  mariadb: 11.4.12
+  redis: 8.6-alpine3.23
+  # RabbitMQ should be bound to the Zulip version. When upgrading Zulip, check the official Zulip Docker Compose and Helm values for the compatible RabbitMQ version:
+  # https://raw.githubusercontent.com/zulip/docker-zulip/12.1-0/compose.yaml
+  # https://raw.githubusercontent.com/zulip/docker-zulip/12.1-0/helm/zulip/values.yaml
+  rabbitmq: 4.3.2-alpine
