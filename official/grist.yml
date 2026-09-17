@@ -1,3 +1,5 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
 services:
   postgres:
     container_name: quollix_grist_postgres
