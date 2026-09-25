@@ -1,0 +1,18 @@
+# This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
+
+services:
+  adguard:
+    container_name: quollix_adguard_adguard
+    image: adguard/adguardhome:v0.107.79@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - quollix_adguard_conf:/opt/adguardhome/conf
+      - quollix_adguard_work:/opt/adguardhome/work
+    labels:
+      quollix.port: 3000
+
+volumes:
+  quollix_adguard_conf: null
+  quollix_adguard_work: null

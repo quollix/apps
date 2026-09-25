@@ -1,4 +1,5 @@
 force_image:
+  # When upgrading PostgreSQL to 18 or newer, update app volume mounts from /var/lib/postgresql/data to /var/lib/postgresql.
   postgres: 17.5-alpine3.22
   mariadb: 11.4.12
   redis: 8.6-alpine3.23
