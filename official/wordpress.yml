@@ -26,7 +26,7 @@ services:
       WORDPRESS_CONFIG_EXTRA: |
         define( 'AUTOMATIC_UPDATER_DISABLED', true );
         define( 'WP_AUTO_UPDATE_CORE', false );
-    image: wordpress:7.1.0-apache@sha256:5a93c470ae8220fddf71f6ebe3bc94e615ddc2ae4d9810f795b830fb11c41a17
+    image: wordpress:7.1.2-apache@sha256:8ae73d594a154e30b112e8d085afbc0895acf7651d8f53ef63aefb42e30822d5
     volumes:
       - quollix_wordpress_wordpress:/var/www/html
     labels:

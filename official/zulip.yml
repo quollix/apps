@@ -54,7 +54,7 @@ services:
 
   zulip:
     container_name: quollix_zulip_zulip
-    image: ghcr.io/zulip/zulip-server:12.2-0@sha256:765f0ab3caa49041989132ee1879d98dbab1df7695c27e713eac1f114d167755
+    image: ghcr.io/zulip/zulip-server:12.3-0@sha256:76a1ecc4ba5470869d9609ef1ec16497b410189918b2daba85862183a59aa275
     environment:
       SETTING_REMOTE_POSTGRES_HOST: postgres
       SETTING_REMOTE_POSTGRES_PORT: "5432"
