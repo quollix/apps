@@ -18,6 +18,8 @@ services:
       - postgres
     environment:
       APP_HOME_URL: "https://grist.${BASE_DOMAIN}"
+      GRIST_LOG_AS_JSON: "true"
+      GRIST_LOG_LEVEL: info
       GRIST_SESSION_SECRET: "${SECRET_SESSION_SECRET}"
       GRIST_BOOT_KEY: "${SECRET_BOOT_KEY}"
       GRIST_ORG_IN_PATH: "true"

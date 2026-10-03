@@ -33,6 +33,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: zulip
       RABBITMQ_DEFAULT_PASS: "${SECRET_RABBITMQ_PASSWORD}"
+      RABBITMQ_LOG: "info,+json"
       # The following node name keeps the RabbitMQ data directory stable across container recreations and upgrades.
       RABBITMQ_NODENAME: rabbit@rabbitmq
     volumes:

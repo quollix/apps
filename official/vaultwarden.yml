@@ -8,6 +8,7 @@ services:
       ADMIN_TOKEN: "${SECRET_ADMIN_TOKEN}"
       SIGNUPS_ALLOWED: false
       DOMAIN: https://vaultwarden.${BASE_DOMAIN}
+      LOG_LEVEL: info
 
       SSO_ENABLED: true
       SSO_AUTHORITY: https://quollix.${BASE_DOMAIN}

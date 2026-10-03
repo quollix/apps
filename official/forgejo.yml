@@ -18,6 +18,7 @@ services:
     environment:
       USER_UID: 1000
       USER_GID: 1000
+      FORGEJO__log__LEVEL: info
       FORGEJO__server__DOMAIN: forgejo.${BASE_DOMAIN}
       FORGEJO__server__ROOT_URL: https://forgejo.${BASE_DOMAIN}/
       FORGEJO__server__SSH_DOMAIN: forgejo.${BASE_DOMAIN}

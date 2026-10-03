@@ -13,7 +13,7 @@ services:
 
   wikijs:
     container_name: quollix_wikijs_wikijs
-    image: ghcr.io/requarks/wiki:2.5.315@sha256:af71a17dc27ccc4c768591b1c504631ed820d9d13d4e8c325be4232c0035638c
+    image: ghcr.io/requarks/wiki:2.5.316@sha256:fffff288a52f76e5b8c19a4fbcd0f3e538e96edea642c4f2d813d54d59a876de
     depends_on:
       - postgres
     environment:
@@ -23,8 +23,8 @@ services:
       DB_USER: wikijs
       DB_PASS: "${SECRET_POSTGRES_PASSWORD}"
       DB_NAME: wiki
-      LOG_LEVEL: debug
-      DEBUG: "wiki:*,openid-client:*,passport:*"
+      LOG_FORMAT: json
+      LOG_LEVEL: info
     labels:
       quollix.port: 3000
 
