@@ -13,19 +13,19 @@ services:
 
   memcached:
     container_name: quollix_zulip_memcached
+    hostname: memcached
     image: memcached:1.6.45-alpine3.24@sha256:c29847751abb41f4c268c84fb3087fee05d4edcbda44409ccb5086e26148e8a7
     command:
       - sh
       - -euc
       - |
-        echo 'mech_list: plain' > "$$SASL_CONF_PATH"
-        echo "zulip@$$HOSTNAME:$$MEMCACHED_PASSWORD" > "$$MEMCACHED_SASL_PWDB"
-        echo "zulip@localhost:$$MEMCACHED_PASSWORD" >> "$$MEMCACHED_SASL_PWDB"
+        echo 'mech_list: plain' > /home/memcache/memcached.conf
+        echo 'zulip@memcached:${SECRET_MEMCACHED_PASSWORD}' > /home/memcache/memcached-sasl-db
+        echo 'zulip@localhost:${SECRET_MEMCACHED_PASSWORD}' >> /home/memcache/memcached-sasl-db
         exec memcached -S
     environment:
       SASL_CONF_PATH: /home/memcache/memcached.conf
       MEMCACHED_SASL_PWDB: /home/memcache/memcached-sasl-db
-      MEMCACHED_PASSWORD: "${SECRET_MEMCACHED_PASSWORD}"
 
   rabbitmq:
     container_name: quollix_zulip_rabbitmq
@@ -43,13 +43,9 @@ services:
     container_name: quollix_zulip_redis
     image: redis:8.6-alpine3.23@sha256:75934ddb37bfaebe3b4082ba673cac39f66495244134f33dd0a502ce03cdcd36
     command:
-      - sh
-      - -euc
-      - |
-        echo "requirepass '$$REDIS_PASSWORD'" > /etc/redis.conf
-        exec redis-server /etc/redis.conf
-    environment:
-      REDIS_PASSWORD: "${SECRET_REDIS_PASSWORD}"
+      - redis-server
+      - --requirepass
+      - "${SECRET_REDIS_PASSWORD}"
     volumes:
       - quollix_zulip_redis:/data:rw
 
