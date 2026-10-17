@@ -22,7 +22,7 @@ services:
 
   nextcloud:
     container_name: quollix_nextcloud_nextcloud
-    image: nextcloud:35.0.1-apache@sha256:276547e033df451770dbf9c0065929e5ea179a613b1884bd3fa807ba1c2703e7
+    image: nextcloud:35.0.2-apache@sha256:a588aa5353703b44106a6129adaaf7bf22521b7a4754f9f529b3228d6aa390c5
     depends_on:
       - mariadb
       - redis

@@ -2,7 +2,7 @@
 
 services:
   grafana:
-    image: grafana/grafana:13.2.3@sha256:b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572
+    image: grafana/grafana:13.2.4@sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f
     container_name: quollix_grafana_grafana
     depends_on:
       - victorialogs
@@ -53,7 +53,7 @@ services:
       - quollix_grafana_victorialogs:/victoria-logs-data
 
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.153.0@sha256:5eff7af5341e401471002f58d106d399e614a62f3d240f2dbc21901e49eed5dd
+    image: victoriametrics/victoria-metrics:v1.154.0@sha256:4bd592341587d669b7f57d54bbb82bd21ac8675f4e24234b7703a7c0f85197d8
     container_name: quollix_grafana_victoriametrics
     command:
       - -httpAuth.username=admin
