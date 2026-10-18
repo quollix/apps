@@ -1,13 +1,29 @@
 # This file is licensed under the 0BSD License: https://opensource.org/license/0bsd
 
 services:
+  postgres:
+    container_name: quollix_grafana_postgres
+    image: postgres:17.5-alpine3.22@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa
+    environment:
+      POSTGRES_DB: grafana
+      POSTGRES_USER: grafana
+      POSTGRES_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
+    volumes:
+      - quollix_grafana_postgres:/var/lib/postgresql/data
+
   grafana:
     image: grafana/grafana:13.2.4@sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f
     container_name: quollix_grafana_grafana
     depends_on:
+      - postgres
       - victorialogs
       - victoriametrics
     environment:
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: quollix_grafana_postgres:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: grafana
+      GF_DATABASE_PASSWORD: "${SECRET_POSTGRES_PASSWORD}"
       GF_LOG_CONSOLE_FORMAT: json
       GF_PLUGINS_PREINSTALL_SYNC: victoriametrics-logs-datasource@0.32.0
       GF_SERVER_ROOT_URL: "https://grafana.${BASE_DOMAIN}"
@@ -86,6 +102,7 @@ services:
 
 volumes:
   quollix_grafana_grafana: null
+  quollix_grafana_postgres: null
   quollix_grafana_victorialogs: null
   quollix_grafana_victoriametrics: null
   quollix_grafana_vector: null
@@ -115,6 +132,9 @@ configs:
           type: prometheus_remote_write
           inputs: [host_metrics]
           endpoint: http://victoriametrics:8428/api/v1/write
+          # The write endpoint returns 204, which Vector's startup healthcheck rejects.
+          healthcheck:
+            enabled: false
           auth:
             strategy: basic
             user: admin

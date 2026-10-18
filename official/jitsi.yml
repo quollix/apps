@@ -33,6 +33,9 @@ services:
       - quollix_jitsi_webstorage:/storage
       - quollix_jitsi_transcripts:/usr/share/jitsi-meet/transcripts:ro
       - quollix_jitsi_loadtest:/usr/share/jitsi-meet/load-test
+    configs:
+      - source: nginx_variables_hash
+        target: /config/nginx/site-confs/variables-hash.conf
     labels:
       quollix.port: 8000
 
@@ -104,3 +107,9 @@ volumes:
   quollix_jitsi_jicofo: null
   quollix_jitsi_jvb: null
   quollix_jitsi_transcripts: null
+
+configs:
+  nginx_variables_hash:
+    content: |
+      # Allow Nginx to build an optimal hash for Jitsi's variables.
+      variables_hash_max_size 2048;

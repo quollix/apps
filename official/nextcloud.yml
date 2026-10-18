@@ -17,6 +17,7 @@ services:
   redis:
     container_name: quollix_nextcloud_redis
     image: redis:8.6-alpine3.23@sha256:75934ddb37bfaebe3b4082ba673cac39f66495244134f33dd0a502ce03cdcd36
+    command: ["redis-server", "--requirepass", "${SECRET_REDIS_PASSWORD}"]
     volumes:
       - quollix_nextcloud_redis:/data
 
@@ -32,6 +33,7 @@ services:
       MYSQL_USER: nextcloud
       MYSQL_PASSWORD: "${SECRET_MARIADB_PASSWORD}"
       REDIS_HOST: quollix_nextcloud_redis
+      REDIS_HOST_PASSWORD: "${SECRET_REDIS_PASSWORD}"
       # Tell Nextcloud that users access it through HTTPS, even though the internal reverse proxy forwards plain HTTP.
       # Without this, security-sensitive features that require HTTPS, such as OIDC login, do not work.
       OVERWRITEPROTOCOL: https
@@ -44,3 +46,4 @@ volumes:
   quollix_nextcloud_mariadb: null
   quollix_nextcloud_nextcloud: null
   quollix_nextcloud_redis: null
+

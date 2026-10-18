@@ -30,6 +30,11 @@ services:
   rabbitmq:
     container_name: quollix_zulip_rabbitmq
     image: rabbitmq:4.3.2-alpine@sha256:835cbc6fabceedef7a3b0ce3195a17adccb753a3ba645bdd61c5557b6e4bf580
+    # Allow enough file descriptors for RabbitMQ files and connections.
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     environment:
       RABBITMQ_DEFAULT_USER: zulip
       RABBITMQ_DEFAULT_PASS: "${SECRET_RABBITMQ_PASSWORD}"
