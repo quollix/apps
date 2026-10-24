@@ -69,7 +69,7 @@ services:
       - quollix_grafana_victorialogs:/victoria-logs-data
 
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.154.0@sha256:4bd592341587d669b7f57d54bbb82bd21ac8675f4e24234b7703a7c0f85197d8
+    image: victoriametrics/victoria-metrics:v1.154.1@sha256:c7884f32920dd45a9d86542a717227e63af03e060e53bbf8031e6e6fd0e1e05d
     container_name: quollix_grafana_victoriametrics
     command:
       - -httpAuth.username=admin
@@ -81,7 +81,7 @@ services:
       - quollix_grafana_victoriametrics:/victoria-metrics-data
 
   vector:
-    image: timberio/vector:0.59.0-debian@sha256:98e7b4dfe50750e61470697bbd2fbeca643d12bea97f351005038ef506eab630
+    image: timberio/vector:0.60.0-debian@sha256:3ccb4bbd36e38734394e158db1411e91a69d076ed25013f8de385046a382d36a
     container_name: quollix_grafana_vector
     hostname: quollix-host
     depends_on:

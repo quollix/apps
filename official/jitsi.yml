@@ -8,7 +8,7 @@
 services:
   jitsi:
     container_name: quollix_jitsi_jitsi
-    image: ghcr.io/jitsi/web:stable-11146-2@sha256:4231d5ff7318ff71d12ffd41afc36adae3c319b40cf79cde39b009b0c68295dc
+    image: ghcr.io/jitsi/web:stable-11248@sha256:615d9882b7bc2bc0b648fb48c153ce2b9c503f37a15e6aaf4f1c8e40f5cf8ca4
     tmpfs:
       - /run:size=16M,mode=1750,exec
       - /tmp:size=16M,mode=1777,noexec
@@ -41,7 +41,7 @@ services:
 
   prosody:
     container_name: quollix_jitsi_prosody
-    image: ghcr.io/jitsi/prosody:stable-11146-2@sha256:9e341b10134d947e49ca338b9efe8d70ac9d6e8d89d621da2246dfa79fe50363
+    image: ghcr.io/jitsi/prosody:stable-11248@sha256:a7a58090d93412f7ecd6692330631519833b2e8c8b06ff433089fb54b7149bb2
     tmpfs:
       - /run:size=16M,mode=1750,exec
       - /tmp:size=16M,mode=1777,noexec
@@ -62,7 +62,7 @@ services:
 
   jicofo:
     container_name: quollix_jitsi_jicofo
-    image: ghcr.io/jitsi/jicofo:stable-11146-2@sha256:a8d64e46eaa340751a2b5530a4abd4175adf05bff07e9775fc48daae6364cfe9
+    image: ghcr.io/jitsi/jicofo:stable-11248@sha256:c4c1ad331d4d942bc433e5452d75c25758dab7058e3fe07b970ced54cb7f5e47
     tmpfs:
       - /run:size=16M,mode=1750,exec
       - /tmp:size=16M,mode=1777,noexec
@@ -80,7 +80,7 @@ services:
 
   jvb:
     container_name: quollix_jitsi_jvb
-    image: ghcr.io/jitsi/jvb:stable-11146-2@sha256:d7dc646d21af07530ae6acf1ace23ea4782445d0362004621a32a5a632a964e9
+    image: ghcr.io/jitsi/jvb:stable-11248@sha256:55cf534aa12931c524835269475c1ea63e5e884a43540f9b318378fd080a335c
     tmpfs:
       - /run:size=16M,mode=1750,exec
       - /tmp:size=16M,mode=1777,noexec
